@@ -9,6 +9,10 @@
         <script src="js/three.min.js"></script>
         <script src="js/OrbitControls.js"></script>
         <script src="js/GLTFLoader.js"></script>
+        <canvas id="c"></canvas>
+
+        
+
         <script>
             
             (function(){var script=document.createElement('script');
@@ -20,12 +24,18 @@
             let scene, camera, renderer, controls, model, hemiLight, spotLight;
             function init(){
 
-                renderer = new THREE.WebGLRenderer({antialias: true});
+                const canvas = document.querySelector('#c');
+                renderer = new THREE.WebGLRenderer({canvas});
                 renderer.toneMapping = THREE.ReinhardToneMapping;
                 renderer.toneMappingExposure = 2.3;
                 renderer.shadowMap.enabled = true;
                 renderer.setSize(window.innerWidth, window.innerHeight);
                 document.body.appendChild(renderer.domElement);
+
+                const fov = 75;
+                const aspect = 2;  // the canvas default
+                const near = 0.1;
+                const far = 5;
 
                 scene = new THREE.Scene();
                 scene.background = new THREE.Color(0x000000);
@@ -78,8 +88,30 @@
                     scene.add(model);
                     animate();
                 }); 
-            }
-            function animate(){
+
+
+
+                function resizeRendererToDisplaySize(renderer) {
+                    const canvas = renderer.domElement;
+                    const pixelRatio = window.devicePixelRatio;
+                    const width  = canvas.clientWidth  * pixelRatio | 0;
+                    const height = canvas.clientHeight * pixelRatio | 0;
+                    const needResize = canvas.width !== width || canvas.height !== height;
+                    if (needResize) {
+                    renderer.setSize(width, height, false);
+                    }
+                    return needResize;
+                }
+
+
+                function animate(){
+
+                    if (resizeRendererToDisplaySize(renderer)) {
+                        const canvas = renderer.domElement;
+                        camera.aspect = canvas.clientWidth / canvas.clientHeight;
+                        camera.updateProjectionMatrix();
+                        }
+
                 renderer.render(scene,camera);
                 spotLight.position.set(
                     camera.position.x + 10,
@@ -87,7 +119,9 @@
                     camera.position.z + 10,
                 );
                 requestAnimationFrame(animate);
+                }
             }
+            
             init();
         </script>
     </body>
